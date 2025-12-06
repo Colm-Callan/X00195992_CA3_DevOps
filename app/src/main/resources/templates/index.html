@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculator</title>
+</head>
+<body>
+  <h1>Calculator</h1>
+  <form id="calcForm" action="/api/calc" method="post">
+    <input type="number" step="any" name="a" id="a" required>
+    <select name="op" id="op">
+      <option value="add">+</option>
+      <option value="sub">-</option>
+      <option value="mul">*</option>
+      <option value="div">/</option>
+    </select>
+    <input type="number" step="any" name="b" id="b" required>
+    <button type="submit">Calculate</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('calcForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const data = new URLSearchParams(new FormData(f));
+      const res = await fetch('/api/calc', { method: 'POST', body: data });
+      const json = await res.json();
+      document.getElementById('result').innerText = 'Result: ' + json.result;
+    });
+  </script>
+</body>
+</html>

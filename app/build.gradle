@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.4'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'com.github.spotbugs' version '5.0.14'
+    id 'jacoco'
+}
+
+group = 'com.example'
+version = '0.1.0'
+sourceCompatibility = '21'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+
+    // Selenium and WebDriverManager for UAT
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.11.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.5.1'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+}
+
+/*
+  SpotBugs currently has trouble with very-new classfile versions in some environments.
+  Set ignoreFailures=true to avoid build breakage; update toolVersion or remove this
+  override once a compatible SpotBugs/ASM release is available.
+*/
+spotbugs {
+    toolVersion = "4.8.0" // attempt a newer SpotBugs / ASM (may or may not be available)
+    ignoreFailures = true
+    effort = "max"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
