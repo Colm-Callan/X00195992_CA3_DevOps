@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculator — Static Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; padding: 2rem; max-width: 720px; margin: auto; }
+    form { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+    input[type="number"], select { padding:.25rem .5rem; font-size:1rem; width:6rem; }
+    button { padding:.4rem .8rem; font-size:1rem; }
+    #result { margin-top:1rem; font-weight:600; }
+  </style>
+</head>
+<body>
+  <h1>Calculator — Static Demo</h1>
+  <p>This page runs entirely in your browser (no server required).</p>
+
+  <form id="calcForm">
+    <input type="number" step="any" name="a" id="a" required placeholder="a">
+    <select name="op" id="op">
+      <option value="add">+</option>
+      <option value="sub">-</option>
+      <option value="mul">*</option>
+      <option value="div">/</option>
+    </select>
+    <input type="number" step="any" name="b" id="b" required placeholder="b">
+    <button type="submit">Calculate</button>
+  </form>
+
+  <div id="result" aria-live="polite"></div>
+
+  <script>
+    document.getElementById('calcForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      const op = document.getElementById('op').value;
+      if (Number.isNaN(a) || Number.isNaN(b)) {
+        document.getElementById('result').innerText = 'Please enter valid numbers';
+        return;
+      }
+      let result;
+      switch (op) {
+        case 'add': result = a + b; break;
+        case 'sub': result = a - b; break;
+        case 'mul': result = a * b; break;
+        case 'div': result = b === 0 ? 'Division by zero' : a / b; break;
+        default: result = 'Invalid op';
+      }
+      document.getElementById('result').innerText = 'Result: ' + result;
+    });
+  </script>
+</body>
+</html>
