@@ -77,3 +77,6 @@ Tests:
 - app/build.gradle — build configuration, dependencies, JaCoCo and Sonar
 - azure-pipelines.yml — CI pipeline configuration runs tests, coverage & Sonar.
 - app/src/test/java — test files.
+
+
+test1
