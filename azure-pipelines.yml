@@ -4,7 +4,6 @@ pr:
       - main
       - development
 
-
 trigger:
   branches:
     include:
@@ -19,8 +18,10 @@ variables:
   SONARCLOUD_PROJECT_KEY: 'Colm-Callan_X00195992_CA3_DevOps2'
 
 steps:
+- checkout: self
+
 - task: Gradle@3
-  displayName: 'Gradle: clean test + jacoco report + sonar (enforce code coverage)'
+  displayName: 'Gradle: clean test + jacoco report (app)'
   inputs:
     workingDirectory: 'app'
     gradleWrapperFile: 'gradlew'
@@ -30,12 +31,7 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-    tasks: >
-      clean test jacocoTestReport jacocoTestCoverageVerification sonarqube
-      -Dsonar.host.url=https://sonarcloud.io
-      -Dsonar.organization=$(SONARCLOUD_ORG)
-      -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
-      -Dsonar.login=$(SONAR_TOKEN)
+    tasks: 'clean test jacocoTestReport jacocoTestCoverageVerification'
 
 - task: PublishTestResults@2
   displayName: 'Publish JUnit test result'
@@ -51,3 +47,19 @@ steps:
     summaryFileLocation: 'app/build/reports/jacoco/test/jacocoTestReport.xml'
     reportDirectory: 'app/build/reports/jacoco/test'
     failIfCoverageEmpty: true
+
+- task: Gradle@3
+  displayName: 'Gradle: sonarqube (root)'
+  inputs:
+    workingDirectory: ''           
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '21'
+    jdkArchitectureOption: 'x64'
+    tasks: 'sonarqube'
+    options: >
+      -Dsonar.host.url=https://sonarcloud.io
+      -Dsonar.organization=$(SONARCLOUD_ORG)
+      -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+      -Dsonar.login=$(SONAR_TOKEN)
