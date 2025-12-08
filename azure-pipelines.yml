@@ -1,53 +1,61 @@
-# pr:
-#   branches:
-#     include:
-#       - main
-#       - development
+pr:
+  branches:
+    include:
+      - main
+      - development
+
+trigger:
+  branches:
+    include:
+      - main
+      - development
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  SONARCLOUD_ORG: 'colmcallan'
+  SONARCLOUD_PROJECT_KEY: 'Colm-Callan_X00195992_CA3_DevOps2'
+
+steps:
+- checkout: self
+  persistCredentials: true
 
 
-# trigger:
-#   branches:
-#     include:
-#       - main
-#       - development
 
-# pool:
-#   vmImage: 'ubuntu-latest'
+# Run tests, generate JaCoCo report, verify coverage and run Sonar analysis
+- task: Gradle@3
+  displayName: 'Gradle: clean test jacoco verify + Sonar analysis (:app:)'
+  inputs:
+    workingDirectory: ''                  
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '21'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/build/test-results/test/TEST-*.xml'
+    tasks: ':app:clean :app:test :app:jacocoTestReport :app:jacocoTestCoverageVerification :app:sonar'
+    options: >
+      -Dsonar.host.url=https://sonarcloud.io
+      -Dsonar.organization=$(SONARCLOUD_ORG)
+      -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+      -Dsonar.login=$(SONAR_TOKEN)
+      -Dsonar.gradle.skipCompile=true
 
-# variables:
-#   SONARCLOUD_ORG: 'colmcallan'
-#   SONARCLOUD_PROJECT_KEY: 'Colm-Callan_DevOpsJavaCalc'
+# Publish JUnit test results (will mark the pipeline as failed if tests failed)
+- task: PublishTestResults@2
+  displayName: 'Publish JUnit test results'
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/build/test-results/test/TEST-*.xml'
+    failTaskOnFailedTests: true
 
-# steps:
-# - task: Gradle@3
-#   displayName: 'Gradle: clean test + jacoco report + sonar (enforce code coverage)'
-#   inputs:
-#     workingDirectory: 'app'
-#     gradleWrapperFile: 'gradlew'
-#     gradleOptions: '-Xmx3072m'
-#     javaHomeOption: 'JDKVersion'
-#     jdkVersionOption: '21'
-#     jdkArchitectureOption: 'x64'
-#     publishJUnitResults: true
-#     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-#     tasks: >
-#       clean test jacocoTestReport jacocoTestCoverageVerification sonarqube
-#       -Dsonar.host.url=https://sonarcloud.io
-#       -Dsonar.organization=$(SONARCLOUD_ORG)
-#       -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
-#       -Dsonar.login=$(SONAR_TOKEN)
-
-# - task: PublishTestResults@2
-#   displayName: 'Publish JUnit test result'
-#   inputs:
-#     testResultsFormat: 'JUnit'
-#     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-#     failTaskOnFailedTests: true
-
-# - task: PublishCodeCoverageResults@1
-#   displayName: 'Publish JaCoCo code coverage'
-#   inputs:
-#     codeCoverageTool: 'JaCoCo'
-#     summaryFileLocation: 'app/build/reports/jacoco/test/jacocoTestReport.xml'
-#     reportDirectory: 'app/build/reports/jacoco/test'
-#     failIfCoverageEmpty: true
+# Publish JaCoCo coverage results to the pipeline summary
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish JaCoCo code coverage'
+  inputs:
+    codeCoverageTool: 'JaCoCo'
+    summaryFileLocation: 'app/build/reports/jacoco/test/jacocoTestReport.xml'
+    reportDirectory: 'app/build/reports/jacoco/test'
+    failIfCoverageEmpty: true
