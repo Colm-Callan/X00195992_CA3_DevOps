@@ -18,7 +18,7 @@ From the repository root
 
 Stop any Gradle daemons and refresh dependencies:
 
-.\gradlew.bat --stop
+.\gradlew.bat --stop and 
 .\gradlew.bat --refresh-dependencies
 
 
