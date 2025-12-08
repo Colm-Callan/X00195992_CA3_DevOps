@@ -19,11 +19,15 @@ variables:
 
 steps:
 - checkout: self
+  persistCredentials: true
 
+
+
+# Run tests, generate JaCoCo report, verify coverage and run Sonar analysis
 - task: Gradle@3
-  displayName: 'Gradle: clean test + jacoco report (app)'
+  displayName: 'Gradle: clean test jacoco verify + Sonar analysis (:app:)'
   inputs:
-    workingDirectory: 'app'
+    workingDirectory: ''                  
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
@@ -31,15 +35,23 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-    tasks: 'clean test jacocoTestReport jacocoTestCoverageVerification'
+    tasks: ':app:clean :app:test :app:jacocoTestReport :app:jacocoTestCoverageVerification :app:sonar'
+    options: >
+      -Dsonar.host.url=https://sonarcloud.io
+      -Dsonar.organization=$(SONARCLOUD_ORG)
+      -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+      -Dsonar.login=$(SONAR_TOKEN)
+      -Dsonar.gradle.skipCompile=true
 
+# Publish JUnit test results (will mark the pipeline as failed if tests failed)
 - task: PublishTestResults@2
-  displayName: 'Publish JUnit test result'
+  displayName: 'Publish JUnit test results'
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
     failTaskOnFailedTests: true
 
+# Publish JaCoCo coverage results to the pipeline summary
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish JaCoCo code coverage'
   inputs:
@@ -47,19 +59,3 @@ steps:
     summaryFileLocation: 'app/build/reports/jacoco/test/jacocoTestReport.xml'
     reportDirectory: 'app/build/reports/jacoco/test'
     failIfCoverageEmpty: true
-
-- task: Gradle@3
-  displayName: 'Gradle: sonarqube (root)'
-  inputs:
-    workingDirectory: ''           
-    gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '21'
-    jdkArchitectureOption: 'x64'
-    tasks: 'sonarqube'
-    options: >
-      -Dsonar.host.url=https://sonarcloud.io
-      -Dsonar.organization=$(SONARCLOUD_ORG)
-      -Dsonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
-      -Dsonar.login=$(SONAR_TOKEN)
