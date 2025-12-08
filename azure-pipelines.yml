@@ -21,9 +21,6 @@ steps:
 - checkout: self
   persistCredentials: true
 
-
-
-# Run tests, generate JaCoCo report, verify coverage and run Sonar analysis
 - task: Gradle@3
   displayName: 'Gradle: clean test jacoco verify + Sonar analysis (:app:)'
   inputs:
@@ -51,7 +48,7 @@ steps:
     testResultsFiles: '**/build/test-results/test/TEST-*.xml'
     failTaskOnFailedTests: true
 
-# Publish JaCoCo coverage results to the pipeline summary
+
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish JaCoCo code coverage'
   inputs:
