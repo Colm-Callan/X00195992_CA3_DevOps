@@ -32,7 +32,7 @@ public class CalculatorUnitTest {
         "3.0, 4.0, mul, 12.0",
         "9.0, 3.0, div, 3.0",
         "-2.0, 5.0, add, 3.0",
-        "0.1, 0.2, add, 0.30000000000000004" // floating-point nuance
+        "0.1, 0.2, add, 0.30000000000000004"
     })
     public void parameterizedArithmeticTests(double a, double b, String op, double expected) {
         CalculationResult r = ctrl.calc(a, b, op);
@@ -54,7 +54,7 @@ public class CalculatorUnitTest {
     @Test
     public void testLargeNumbers() {
         CalculationResult r = ctrl.calc(1e9, 1e9, "add");
-        assertEquals(2e9, r.getResult(), 1e-3); // allow larger tolerance for huge values
+        assertEquals(2e9, r.getResult(), 1e-3);
     }
 
     @Test
